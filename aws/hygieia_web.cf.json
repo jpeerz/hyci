@@ -37,7 +37,7 @@
                             [
                             "#!/bin/bash",
                             "apt-get update && apt install -y htop puppet git-core",
-                            "curl -s -o /opt/hygieia.sh && bash /opt/hygieia.sh"
+                            "curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh"
                             ]
                         ]
                     }
