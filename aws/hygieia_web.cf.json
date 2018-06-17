@@ -36,12 +36,8 @@
                     "Fn::Join" : ["\n", 
                             [
                             "#!/bin/bash",
-                            "apt-get update",
-                            "apt install -y puppet git-core && git clone https://github.com/jpeerz/puppetparts.git /opt/puppetparts && cp /opt/puppetparts/puppet/modules/core/files/puppet.conf /etc/puppet/puppet.conf",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/java.pp",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/maven.pp",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/mongodb.pp",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/nodejs.pp"
+                            "apt-get update && apt install -y htop puppet git-core",
+                            "curl -s -o /opt/hygieia.sh && bash /opt/hygieia.sh"
                             ]
                         ]
                     }

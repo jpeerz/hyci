@@ -33,7 +33,7 @@ file { "$hygieia_home/mongodb_dashboarddb.js":
     backup  => true,
     content => "use dashboarddb;db.createUser({user: 'dashboarduser',pwd: '$admin_pwd',roles: [{role: 'readWrite', db: 'dashboarddb'}]})"
 }
-exec{"setup_hygieia_admin":
+exec { "setup_hygieia_admin":
     command => "mongo < $hygieia_home/mongodb_dashboarddb.js",
     require => File["$hygieia_home/mongodb_dashboarddb.js"]
 }
