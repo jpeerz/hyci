@@ -35,6 +35,11 @@ dbhostport=localhost:27017
 server.contextPath=/api
 server.port=8080
 EOT
-## service
+## build and start service
+cd ${HYGIEIA_HOME}/Hygieia
+git checkout Hygieia-2.0.4
+cd ${HYGIEIA_HOME}/Hygieia/UI
+npm install && bower install
+cd${HYGIEIA_HOME}/Hygieia && mvn -Dmaven.test.skip=true -Dlicense.skip=true clean install package
 cd ${HYGIEIA_HOME}/api/target/ && java -jar api.jar --spring.config.location=/opt/dashboard.properties -Djasypt.encryptor.password=nj3zqxtLpDtTYpBbcrk303kvwexeYddF 2>&1 > ~/Hygieia.api.log &
 cd ${HYGIEIA_HOME}/UI && gulp serve  2>&1 > ~/Hygieia.ui.log &
