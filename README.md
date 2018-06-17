@@ -56,9 +56,17 @@ A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provi
     git clone https://github.com/jpeerz/hyci.git
     cd aws
     bash ./init_cli.sh && source pylibs/bin/activate
-    aws cloudformation create-stack  --stack-name hygieia-box-tut1 \
+    export EC2_INSTANCE_NAME=hygieia-box-manual-1
+    aws cloudformation create-stack  --stack-name $EC2_INSTANCE_NAME \
     --template-body file://`pwd`/hygieia_web.cf.json \
     --parameters    file://`pwd`/hygieia_parameters.cf.json
+
+This CF will provision the new machine with next stack
+
+    * java
+    * maven
+    * mongodb
+    * nodejs
 
 Once the resources are built I get the public IP as next:
 
@@ -83,8 +91,13 @@ After some minutes of build process the UI must be available at
 
 http://INSTANCE_IP:3000
 
+## Time to orchestrate
+
+### Build jenkins-1 machine
 
 
+
+### Build docker-registry-1 machine
 
 
 
