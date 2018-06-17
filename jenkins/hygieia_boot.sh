@@ -20,7 +20,7 @@ puppet apply --environment hygieia --modulepath ${PUPPETPARTS}/puppet/modules:/e
 puppet apply --environment hygieia --modulepath ${PUPPETPARTS}/puppet/modules:/etc/puppet/modules ${PUPPETPARTS}/puppet/modules/core/manifests/mongodb.pp
 puppet apply --environment hygieia --modulepath ${PUPPETPARTS}/puppet/modules:/etc/puppet/modules ${PUPPETPARTS}/puppet/modules/core/manifests/nodejs.pp
 
-chown -R ubuntu:ubuntu /opt
+chown -R ubuntu:ubuntu $BUILD_WS
 sudo -H -u ubuntu bash -c "sh $HYCI/jenkins/hygieia_setup.sh $BUILD_WS"
 
 echo 'All Set.'

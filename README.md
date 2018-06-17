@@ -38,20 +38,41 @@ Before any continuous implementation is set, a clear understanding of all its pi
 
 A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provisioned with puppet.
 
-    aws cloudformation create-stack  --stack-name hygieia-box \
-    --template-body file://`pwd`/hygieia.cf.json \
-    --parameters    file://`pwd`/hygieia.parameters.cf.json
+    git clone https://github.com/jpeerz/hyci.git
+    cd aws
+    bash ./init_cli.sh && source pylibs/bin/activate
+    aws cloudformation create-stack  --stack-name hygieia-box-test \
+    --template-body file://`pwd`/hygieia_web.cf.json \
+    --parameters    file://`pwd`/hygieia_parameters.cf.json
 
 Once the resources are build I get the public IP as next:
 
     aws cloudformation describe-stack-resources --stack-name hygieia-box
-    aws ec2 describe-instances --instance-ids i-0197fa8b04a6b5818 --query 'Reservations[*].Instances[*].PublicIpAddress'
+    aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --instance-ids
 
 At this point I'm ready to access host and confirm software provisioning and check running services states.
 
-    ssh -i ~/.ssh/webadmin.pem ubuntu@52.10.43.90
+    ssh -i ~/.ssh/webadmin.pem ubuntu@52.88.205.79
 
-.
+curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh
+
+
+Error: /Stage[main]/Main/File[/etc/mongod.conf.js]: 
+Could not evaluate: Could not retrieve information from environment hygieia source(s) 
+puppet:///modules/core/mongodb_admin.js
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
