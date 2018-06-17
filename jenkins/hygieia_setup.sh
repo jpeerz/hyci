@@ -10,7 +10,7 @@ db.createUser({
     roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
 })
 EOT
-mongo < ${HYGIEIA_HOME}/mongodb_admin.js
+mongo admin < ${HYGIEIA_HOME}/mongodb_admin.js
 cat > ${HYGIEIA_HOME}/mongodb_dashboarddb.js <<EOT
 use dashboarddb
 db.createUser(
