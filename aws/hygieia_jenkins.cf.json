@@ -36,8 +36,8 @@
                     "Fn::Join" : ["\n", 
                             [
                             "#!/bin/bash",
-                            "apt-get update",
-                            "apt install -y puppet git-core && git clone https://github.com/jpeerz/puppetparts.git /opt/puppetparts && cp /opt/puppetparts/puppet/modules/core/files/puppet.conf /etc/puppet/puppet.conf",
+                            "apt-get update && apt install -y puppet git-core python-pip virtualenv awscli",
+                            "curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh",
                             "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/java.pp",
                             "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/maven.pp",
                             "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/jenkins.pp"

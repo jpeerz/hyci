@@ -30,7 +30,7 @@ Build 4 cloud boxes to orchestrate the code push cycle.
 
 ### Pre-requirements
 
-In order to build EC2 instances we need next AWS things:
+In order to build EC2 instances we need next AWS things(update jpeerz/hyci/aws/hygieia_parameters.cf.json):
 
 * aws command line tool
 * aws ssh key pair
@@ -41,7 +41,7 @@ In order to build EC2 instances we need next AWS things:
 
 ### Getting familiar with Hygieia architecture
 
-Before any continuous implementation is set, a clear understanding of all its pieces is needed. Next I'm going to install a fully working instance step by step.
+Before any continuous implementation is set, a clear understanding of all its pieces is needed. Next we're going to install a fully working instance step by step.
 
 A base linux distro with puppet ready is provisioned with a bootstrap script
 
@@ -56,25 +56,18 @@ A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provi
     git clone https://github.com/jpeerz/hyci.git
     cd aws
     bash ./init_cli.sh && source pylibs/bin/activate
-    aws cloudformation create-stack  --stack-name hygieia-box-test \
+    aws cloudformation create-stack  --stack-name hygieia-box-tut1 \
     --template-body file://`pwd`/hygieia_web.cf.json \
     --parameters    file://`pwd`/hygieia_parameters.cf.json
 
 Once the resources are built I get the public IP as next:
 
-    aws cloudformation describe-stack-resources --stack-name hygieia-box
+    aws cloudformation describe-stack-resources --stack-name hygieia-box-tut1
     aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --instance-ids
 
-At this point I'm ready to access host and confirm software provisioning and check running services states.
+At this point we're ready to access host and confirm software provisioning and check running services states.
 
-    ssh -i ~/.ssh/webadmin.pem ubuntu@52.88.205.79
-
-
-
-
-
-
-
+    ssh -i ~/.ssh/webadmin.pem ubuntu@
 
 
 

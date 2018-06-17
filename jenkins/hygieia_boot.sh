@@ -5,6 +5,7 @@ HYCI=${BUILD_WS}/hyci
 PUPPETPARTS=${BUILD_WS}/puppetparts
 HYGIEIA=${BUILD_WS}/hygieia
 
+echo 'export LC_ALL="en_US.UTF-8"' >> /etc/environment
 # add swap space
 fallocate -l 4G /mnt/4GB.swap && dd if=/dev/zero of=/mnt/4GB.swap bs=1024 count=4194304
 chmod 0600 /mnt/4GB.swap  && mkswap /mnt/4GB.swap && swapon /mnt/4GB.swap
@@ -14,6 +15,8 @@ echo '/mnt/4GB.swap none  swap  sw 0  0' >> /etc/fstab
 git clone https://github.com/jpeerz/puppetparts.git ${PUPPETPARTS}
 git clone https://github.com/jpeerz/hyci.git $HYCI
 git clone https://github.com/jpeerz/Hygieia.git $HYGIEIA
+
+chown -R ubuntu:ubuntu $BUILD_WS
 
 cp ${PUPPETPARTS}/puppet/modules/core/files/puppet.conf /etc/puppet/puppet.conf
 
