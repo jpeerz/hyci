@@ -21,7 +21,7 @@ Hygieia is a dashboard UI connecting external services (controllers) to gather u
 
 ### Infrastructure idea
 
-Build 4 cloud boxes to orchestrate the code push cycle
+Build 4 cloud boxes to orchestrate the code push cycle.
 
 * jenkins-1
 * docker-registry-1
@@ -30,11 +30,26 @@ Build 4 cloud boxes to orchestrate the code push cycle
 
 ### Pre-requirements
 
+In order to build EC2 instances we need next AWS things:
+
+* aws command line tool
+* aws ssh key pair
+* aws subnet id
+* aws vpc id
+
+> this setup is required on jenkins box later
+
 ### Getting familiar with Hygieia architecture
 
 Before any continuous implementation is set, a clear understanding of all its pieces is needed. Next I'm going to install a fully working instance step by step.
 
-## Building API+UI project with AWS ec2
+A base linux distro with puppet ready is provisioned with a bootstrap script
+
+    curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh
+
+> previous curl is already triggered by CloudFormation during build.
+
+### Building API+UI project with AWS ec2
 
 A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provisioned with puppet.
 
@@ -45,7 +60,7 @@ A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provi
     --template-body file://`pwd`/hygieia_web.cf.json \
     --parameters    file://`pwd`/hygieia_parameters.cf.json
 
-Once the resources are build I get the public IP as next:
+Once the resources are built I get the public IP as next:
 
     aws cloudformation describe-stack-resources --stack-name hygieia-box
     aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --instance-ids
@@ -54,12 +69,8 @@ At this point I'm ready to access host and confirm software provisioning and che
 
     ssh -i ~/.ssh/webadmin.pem ubuntu@52.88.205.79
 
-curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh
 
 
-Error: /Stage[main]/Main/File[/etc/mongod.conf.js]: 
-Could not evaluate: Could not retrieve information from environment hygieia source(s) 
-puppet:///modules/core/mongodb_admin.js
 
 
 

@@ -14,13 +14,7 @@ echo '/mnt/4GB.swap none  swap  sw 0  0' >> /etc/fstab
 git clone https://github.com/jpeerz/puppetparts.git ${PUPPETPARTS}
 git clone https://github.com/jpeerz/hyci.git $HYCI
 git clone https://github.com/jpeerz/Hygieia.git $HYGIEIA
+
 cp ${PUPPETPARTS}/puppet/modules/core/files/puppet.conf /etc/puppet/puppet.conf
-puppet apply --environment hygieia --modulepath ${PUPPETPARTS}/puppet/modules:/etc/puppet/modules ${PUPPETPARTS}/puppet/modules/core/manifests/java.pp
-puppet apply --environment hygieia --modulepath ${PUPPETPARTS}/puppet/modules:/etc/puppet/modules ${PUPPETPARTS}/puppet/modules/core/manifests/maven.pp
-puppet apply --environment hygieia --modulepath ${PUPPETPARTS}/puppet/modules:/etc/puppet/modules ${PUPPETPARTS}/puppet/modules/core/manifests/mongodb.pp
-puppet apply --environment hygieia --modulepath ${PUPPETPARTS}/puppet/modules:/etc/puppet/modules ${PUPPETPARTS}/puppet/modules/core/manifests/nodejs.pp
 
-chown -R ubuntu:ubuntu $BUILD_WS
-sudo -H -u ubuntu bash -c "sh $HYCI/jenkins/hygieia_setup.sh $BUILD_WS"
-
-echo 'All Set.'
+echo 'Ready for provisioning.'
