@@ -18,6 +18,11 @@ node {
                 name: 'EC2_INSTANCE_NAME',
                 defaultValue: 'docker-web-15',
                 description: 'AWS ec2 instance name'
+            ),
+            string(
+                name: 'CF_STACK_TEMPLATE',
+                defaultValue: 'hygieia_web',
+                description: 'AWS CloudFormation stack name'
             )
         ])
     ])
@@ -30,7 +35,7 @@ node {
     stage('Creating new EC2') {
         try {
             echo "About to create new EC2 instance [ $EC2_INSTANCE_NAME ]"
-            aws "cloudformation create-stack  --stack-name $EC2_INSTANCE_NAME --template-body file://$WORKSPACE/aws/hygieia_web.cf.json --parameters file://$WORKSPACE/aws/hygieia_parameters.cf.json"
+            aws "cloudformation create-stack  --stack-name $EC2_INSTANCE_NAME --template-body file://$WORKSPACE/aws/${CF_STACK_TEMPLATE}.cf.json --parameters file://$WORKSPACE/aws/hygieia_parameters.cf.json"
         } catch(Exception err) {
             echo "Not able to execute aws commands."
             throw err

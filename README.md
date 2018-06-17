@@ -63,14 +63,17 @@ A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provi
 Once the resources are built I get the public IP as next:
 
     aws cloudformation describe-stack-resources --stack-name hygieia-box-tut1
-    aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --instance-ids
+    aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --instance-ids INSTANCE_ID
 
 At this point we're ready to access host and confirm software provisioning and check running services states.
 
-    ssh -i ~/.ssh/webadmin.pem ubuntu@
+    ssh -i ~/.ssh/webadmin.pem ubuntu@34.220.101.48
+    cd ~/hyci/
+    sh jenkins/hygieia_setup_and_run.sh /home/ubuntu/hygieia Hygieia-2.0.4
 
+or run as root
 
-
+    sudo -H -u ubuntu bash -c "sh $HYCI/jenkins/hygieia_setup_and_run.sh $BUILD_WS"
 
 
 
