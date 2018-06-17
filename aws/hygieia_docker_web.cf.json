@@ -38,7 +38,9 @@
                             "#!/bin/bash",
                             "apt-get update && apt install -y htop puppet git-core",
                             "curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/docker.pp"
+                            "export HYWS=/home/ubuntu",
+                            "puppet apply --environment hygieia-web --modulepath ${HYWS}/puppetparts/puppet/modules:/etc/puppet/modules ${HYWS}/puppetparts/puppet/modules/core/manifests/docker.pp"
+                            "touch /opt/awscf.done"
                             ]
                         ]
                     }

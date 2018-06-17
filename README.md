@@ -62,20 +62,26 @@ A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provi
 
 Once the resources are built I get the public IP as next:
 
-    aws cloudformation describe-stack-resources --stack-name hygieia-box-tut1
-    aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --instance-ids INSTANCE_ID
+    ec2_instance_id = $(aws cloudformation describe-stack-resources --output text --stack-name $EC2_INSTANCE_NAME | grep 'AWS::EC2::Instance' | awk '{print $3}')
+    aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text --instance-ids $ec2_instance_id
 
 At this point we're ready to access host and confirm software provisioning and check running services states.
 
-    ssh -i ~/.ssh/webadmin.pem ubuntu@34.220.101.48
+    ssh -i ~/.ssh/webadmin.pem ubuntu@INSTANCE_IP
+
+e.g. Setup Hygieia api and ui then start as spring boot processes
+    
     cd ~/hyci/
-    sh jenkins/hygieia_setup_and_run.sh /home/ubuntu/hygieia Hygieia-2.0.4
+    sh /home/ubuntu/hygieia/jenkins/hygieia_setup_and_run.sh /home/ubuntu/hygieia Hygieia-2.0.4
 
 or run as root
 
-    sudo -H -u ubuntu bash -c "sh $HYCI/jenkins/hygieia_setup_and_run.sh $BUILD_WS"
+    export HYCI=/home/ubuntu/hygieia
+    sudo -H -u ubuntu bash -c "sh $HYCI/jenkins/hygieia_setup_and_run.sh $HOME"
 
+After some minutes of build process the UI must be available at 
 
+http://INSTANCE_IP:3000
 
 
 

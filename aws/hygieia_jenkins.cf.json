@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Base Ubuntu Xenial",
+    "Description": "Continuous Delivery Box Base Ubuntu Xenial",
     "Resources": {
         "Instance": {
             "Type": "AWS::EC2::Instance",
