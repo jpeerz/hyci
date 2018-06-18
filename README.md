@@ -171,24 +171,39 @@ When we need to include new container, do as next:
 
 This web box is a docker slave ready to pull containers and run apps.
 
-    docker pull 34.215.221.237:5000/hygieia-ui
-    docker pull 34.215.221.237:5000/hygieia-api
+Run first time
+
+    docker volume create hygieia_logs
     docker volume create hygieia_data
     docker run -d -p 27017:27017 --name mongodb -v hygieia_data:/data/db mongo:latest  mongod --smallfiles
     docker exec -t -i mongodb mongo admin --eval 'db.getSiblingDB("dashboarddb").createUser({user: "dashboarduser", pwd: "admin", roles: [{role: "readWrite", db: "dashboarddb"}]})'
-    docker volume create hygieia_logs
+    
+    docker pull 34.215.221.237:5000/hygieia-ui
+    docker pull 34.215.221.237:5000/hygieia-api
+
+Start database
+
+    docker run -d -p 27017:27017 --name mongodb -v hygieia_data:/data/db mongo:latest  mongod --smallfiles
+
+Init API service
+
     docker tag 34.215.221.237:5000/hygieia-api hygieia-api
     docker run -t -p 8080:8080 --name api --link mongodb:mongo -v hygieia_logs:/hygieia/logs -i hygieia-api:latest
 
 > we could use _--env-file api.env_
 
+Init API service with minimal ENV values
+
     docker run -e SPRING_DATA_MONGODB_DATABASE=dashboarddb -e SPRING_DATA_MONGODB_HOST=127.0.0.1 -e SPRING_DATA_MONGODB_USERNAME=dashboarduser -e SPRING_DATA_MONGODB_PASSWORD=admin -dt -p 8080:8080 --name api --link mongodb:mongo --env-file /home/ubuntu/api.env -v hygieia_logs:/hygieia/logs -i hygieia-api:latest
+
+Start up the UI
+
     docker tag 34.215.221.237:5000/hygieia-ui hygieia-ui
-    docker run -tdP -p 8888:80 --name ui --link api -i hygieia-ui:latest
+    docker run -t -p 8888:80 --name ui --link api -i hygieia-ui:latest
 
 or
 
-    docker run -e HYGIEIA_API_PORT=8080 -t -p 8088:80 --name ui --link api -i hygieia-ui:latest
+    docker run -e HYGIEIA_API_PORT=8080 -dt -p 8088:80 --name ui --link api -i hygieia-ui:latest
 
 Ready to browse dashboard at 18.236.159.168:8888
 
