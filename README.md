@@ -207,11 +207,15 @@ or
 
 Ready to browse dashboard at 18.236.159.168:8888
 
+## All running
 
+jenkins-1 | http://54.202.195.169:8080/
 
+docker-1 | http://34.215.221.237:5000/v2/_catalog
 
+web-1 | http://54.191.95.91:3000
 
-
-
+web-2 | http://18.236.159.168:8888
+    
 
 
