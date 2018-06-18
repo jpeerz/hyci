@@ -42,9 +42,10 @@ node {
         }
     }
     stage('Get server AWS instance ID and IP'){
-        sh "sleep 15"
+        sh "sleep 20"
         ec2_instance_id = aws("cloudformation describe-stack-resources --output text --stack-name $EC2_INSTANCE_NAME | grep 'AWS::EC2::Instance' | awk '{print \$3}'")
         echo "AWS::EC2::Instance: $ec2_instance_id"
+        sh "sleep 10"
         ec2_instance_ip = aws("ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress'  --output text --instance-ids $ec2_instance_id")
         echo "Ready to ssh: $ec2_instance_ip"
     }

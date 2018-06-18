@@ -39,6 +39,14 @@ In order to build EC2 instances we need next AWS things(update jpeerz/hyci/aws/h
 
 > this setup is required on jenkins box later
 
+### Additional tools
+
+Reusing code from my toolbox:
+
+* https://github.com/jpeerz/puppetparts.git
+* https://github.com/jpeerz/hyci.git
+* https://github.com/jpeerz-hygieia/Hygieia.git
+
 ### Getting familiar with Hygieia architecture
 
 Before any continuous implementation is set, a clear understanding of all its pieces is needed. Next we're going to install a fully working instance step by step.
@@ -75,7 +83,8 @@ Once the resources are built I get the public IP as next:
 
 At this point we're ready to access host and confirm software provisioning and check running services states.
 
-    ssh -i ~/.ssh/webadmin.pem ubuntu@INSTANCE_IP
+    ssh -i ~/.ssh/webadmin.pem ubuntu@54.191.95.91
+    tail -f /var/log/syslog
 
 e.g. Setup Hygieia api and ui then start as spring boot processes
     
@@ -85,19 +94,106 @@ e.g. Setup Hygieia api and ui then start as spring boot processes
 or run as root
 
     export HYCI=/home/ubuntu/hygieia
-    sudo -H -u ubuntu bash -c "sh $HYCI/jenkins/hygieia_setup_and_run.sh $HOME"
+    sudo -H -u ubuntu bash -c "sh $HYCI/jenkins/hygieia_setup_and_run.sh $HOME/hygieia Hygieia-2.0.4"
 
-After some minutes of build process the UI must be available at 
+After some minutes build process the UI must be available at 
 
-http://INSTANCE_IP:3000
+http://54.191.95.91:3000
 
 ## Time to orchestrate
 
 ### Build jenkins-1 machine
 
+    aws cloudformation create-stack --stack-name ci-1 \
+    --template-body file://`pwd`/puppetparts/aws/hygieia_jenkins.cf.json \
+    --parameters    file://`pwd`/puppetparts/aws/hygieia_parameters.cf.json
 
+This CF will provision the new machine with next stack
+
+    * awscli
+    * java
+    * maven
+    * jenkins
+
+We're ready to complete Jenkins initial setup
+
+    ssh -i ~/.ssh/webadmin.pem ubuntu@54.202.195.169
+    # cat thepasswordfile
+
+> install this *.pem key for the jenkins user
+
+Browse to new Jenkins url http://54.202.195.169:8080 to install recommended plugins, then go to [Global Tool Config](http://54.202.195.169:8080/configureTools/) and set
+
+java
+
+    JDK
+    ORACLE8
+    /usr/lib/jvm/java-8-oracle/
+
+mvn
+
+    MAVEN
+    MAVEN3
+    /usr/share/maven/
+
+github [GitHubPushTrigger](https://wiki.jenkins.io/display/JENKINS/Github+Plugin)
+
+> confirm webhook is properly added at your repo https://github.com/jpeerz-hygieia/Hygieia/settings/hooks
+
+If we need to remove token go to https://github.com/settings/developers
 
 ### Build docker-registry-1 machine
+
+Let's build a docker registry instace to store all releases as containers.
+
+    aws cloudformation create-stack --stack-name docker-registry-1 \
+    --template-body file://`pwd`/puppetparts/aws/hygieia_docker_registry.cf.json \
+    --parameters    file://`pwd`/puppetparts/aws/hygieia_parameters.cf.json
+
+Use a docker volume to persist containers catalog
+
+    docker volume create dockreg
+    docker run -d -p 5000:5000 --restart=always --name registry -v dockreg:/var/lib/registry registry:2
+
+We can use the resgistry REST endpoint to list available containers.
+
+    curl http://34.215.221.237:5000/v2/_catalog
+    {"repositories":["hygieia-api","hygieia-ui"]}
+
+When we need to include new container, do as next:
+
+    docker tag hygieia-ui localhost:5000/hygieia-api
+    docker push localhost:5000/hygieia-api
+    docker tag hygieia-ui localhost:5000/hygieia-ui
+    docker push localhost:5000/hygieia-ui
+
+### Build docker-web-1 machine
+
+This web box is a docker slave ready to pull containers and run apps.
+
+    docker pull 34.215.221.237:5000/hygieia-ui
+    docker pull 34.215.221.237:5000/hygieia-api
+    docker volume create hygieia_data
+    docker run -d -p 27017:27017 --name mongodb -v hygieia_data:/data/db mongo:latest  mongod --smallfiles
+    docker exec -t -i mongodb mongo admin --eval 'db.getSiblingDB("dashboarddb").createUser({user: "dashboarduser", pwd: "admin", roles: [{role: "readWrite", db: "dashboarddb"}]})'
+    docker volume create hygieia_logs
+    docker tag 34.215.221.237:5000/hygieia-api hygieia-api
+    docker run -t -p 8080:8080 --name api --link mongodb:mongo -v hygieia_logs:/hygieia/logs -i hygieia-api:latest
+
+> we could use _--env-file api.env_
+
+    docker run -e SPRING_DATA_MONGODB_DATABASE=dashboarddb -e SPRING_DATA_MONGODB_HOST=127.0.0.1 -e SPRING_DATA_MONGODB_USERNAME=dashboarduser -e SPRING_DATA_MONGODB_PASSWORD=admin -dt -p 8080:8080 --name api --link mongodb:mongo --env-file /home/ubuntu/api.env -v hygieia_logs:/hygieia/logs -i hygieia-api:latest
+    docker tag 34.215.221.237:5000/hygieia-ui hygieia-ui
+    docker run -tdP -p 8888:80 --name ui --link api -i hygieia-ui:latest
+
+or
+
+    docker run -e HYGIEIA_API_PORT=8080 -t -p 8088:80 --name ui --link api -i hygieia-ui:latest
+
+Ready to browse dashboard at 18.236.159.168:8888
+
+
+
 
 
 

@@ -48,5 +48,6 @@ git checkout $HYGIEIA_RELEASE
 cd ${HYGIEIA_HOME}/UI
 npm install && bower install
 cd ${HYGIEIA_HOME}/ && mvn -Dmaven.test.skip=true -Dlicense.skip=true clean install package
-cd ${HYGIEIA_HOME}/api/target/ && java -jar api.jar --spring.config.location=/opt/dashboard.properties -Djasypt.encryptor.password=nj3zqxtLpDtTYpBbcrk303kvwexeYddF 2>&1 > ~/Hygieia.api.log &
+cd ${HYGIEIA_HOME}/api/target/ && java -jar api.jar --spring.config.location=${HYGIEIA_HOME}/dashboard.properties -Djasypt.encryptor.password=nj3zqxtLpDtTYpBbcrk303kvwexeYddF 2>&1 > ~/Hygieia.api.log &
+sleep 20
 cd ${HYGIEIA_HOME}/UI && gulp serve  2>&1 > ~/Hygieia.ui.log &

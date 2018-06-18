@@ -39,7 +39,9 @@
                             "apt-get update && apt install -y htop puppet git-core",
                             "curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh",
                             "export HYWS=/home/ubuntu",
+                            "puppet apply --environment hygieia-web --modulepath ${HYWS}/puppetparts/puppet/modules:/etc/puppet/modules ${HYWS}/puppetparts/puppet/modules/core/manifests/java.pp",
                             "puppet apply --environment hygieia-web --modulepath ${HYWS}/puppetparts/puppet/modules:/etc/puppet/modules ${HYWS}/puppetparts/puppet/modules/core/manifests/docker.pp",
+                            "curl -s -o /etc/docker/daemon.json https://raw.githubusercontent.com/jpeerz/hyci/master/aws/docker_daemon.json && service docker reload",
                             "touch /opt/awscf.done"
                             ]
                         ]
@@ -63,6 +65,12 @@
                         "FromPort": "3000",
                         "IpProtocol": "tcp",
                         "ToPort": "3000"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "8888",
+                        "IpProtocol": "tcp",
+                        "ToPort": "8888"
                     }
                 ],
                 "VpcId": {

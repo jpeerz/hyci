@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Web Base Ubuntu Xenial",
+    "Description": "Docker Registry Ubuntu Xenial",
     "Resources": {
         "Instance": {
             "Type": "AWS::EC2::Instance",
@@ -36,11 +36,13 @@
                     "Fn::Join" : ["\n", 
                             [
                             "#!/bin/bash",
-                            "apt-get update",
-                            "apt install -y puppet git-core && git clone https://github.com/jpeerz/puppetparts.git /opt/puppetparts && cp /opt/puppetparts/puppet/modules/core/files/puppet.conf /etc/puppet/puppet.conf",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/java.pp",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/maven.pp",
-                            "puppet apply --environment localhost --modulepath /opt/puppetparts/puppet/modules:/etc/puppet/modules /opt/puppetparts/puppet/modules/core/manifests/docker.pp"
+                            "apt-get update && apt install -y htop puppet git-core",
+                            "curl -s -o /opt/hygieia.sh https://raw.githubusercontent.com/jpeerz/hyci/master/jenkins/hygieia_boot.sh && bash /opt/hygieia.sh",
+                            "export HYWS=/home/ubuntu",
+                            "puppet apply --environment hygieia-web --modulepath ${HYWS}/puppetparts/puppet/modules:/etc/puppet/modules ${HYWS}/puppetparts/puppet/modules/core/manifests/java.pp",
+                            "puppet apply --environment hygieia-web --modulepath ${HYWS}/puppetparts/puppet/modules:/etc/puppet/modules ${HYWS}/puppetparts/puppet/modules/core/manifests/docker.pp",
+                            "curl -s -o /etc/docker/daemon.json https://raw.githubusercontent.com/jpeerz/hyci/master/aws/docker_daemon.json && service docker reload",
+                            "touch /opt/awscf.done"
                             ]
                         ]
                     }
@@ -60,9 +62,9 @@
                     },
                     {
                         "CidrIp": "0.0.0.0/0",
-                        "FromPort": "3000",
+                        "FromPort": "5000",
                         "IpProtocol": "tcp",
-                        "ToPort": "3000"
+                        "ToPort": "5000"
                     }
                 ],
                 "VpcId": {
