@@ -13,9 +13,14 @@ node ("build"){
         pipelineTriggers([]),
         parameters([
             string(
+                name: 'HYGIEIA_BRANCH',
+                defaultValue: 'master',
+                description: 'Trigger CI with different branch.'
+            ),
+            string(
                 name: 'HYGIEIA_RELEASE',
-                defaultValue: 'Hygieia-2.0.4',
-                description: 'Release tag to dockerize and save in registry'
+                defaultValue: 'latest',
+                description: 'Release tag to dockerize and save in registry latest=master'
             ),
             string(
                 name: 'DOCKER_REGISTRY',
@@ -26,12 +31,21 @@ node ("build"){
     ])
     
     stage('Checkout Lastest'){
-        //checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: 'https://github.com/jpeerz-hygieia/Hygieia.git']], branches: [[name: "refs/tags/${HYGIEIA_RELEASE}"]]], poll: false
-        git url: 'https://github.com/jpeerz-hygieia/Hygieia.git', branch: "master"
+        git url: 'https://github.com/jpeerz-hygieia/Hygieia.git', branch: params.HYGIEIA_BRANCH
         try {
-            do_maven("clean install package")
+            do_maven("clean install package -Dmaven.test.skip=true -Dlicense.skip=true")
         } catch(Exception err) {
             echo "Building hygieia container failed: $err"
+            throw err
+        }
+    }
+    
+    stage('Run Tests'){
+        try {
+            do_maven("test")
+            junit '**/target/surefire-reports/*.xml'
+        } catch(Exception err) {
+            echo "Some tests failed: $err"
             throw err
         }
     }
