@@ -237,5 +237,6 @@ Ready to browse dashboard at 18.236.159.168:8888
 * Deploy & Configure controllers containers on pull machines (docker-web's CF template)
 * Update daemon.json to use private IP only
 * Automate password generation
+* Don't stop pipeline on `docker stop`
 * Script pipeline to add new ec2 machines as node using jenkins REST API.
 

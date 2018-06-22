@@ -24,7 +24,7 @@ node ("build"){
             ),
             string(
                 name: 'DOCKER_REGISTRY',
-                defaultValue: 'http://34.215.221.237:5000',
+                defaultValue: '34.215.221.237:5000',
                 description: 'Server waiting docker push'
             )
         ])
@@ -61,7 +61,7 @@ node ("build"){
     
     stage('Publish New Version') {
         try {
-            docker.withRegistry("$DOCKER_REGISTRY"){
+            docker.withRegistry("http://$DOCKER_REGISTRY"){
                 api = docker.image('hygieia-api')
                 api.push("${HYGIEIA_RELEASE}")
                 ui = docker.image('hygieia-ui')
