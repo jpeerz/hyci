@@ -34,7 +34,12 @@ node {
     
     stage('Connect and Run') {
         //echo remotebash("ip addr")
-        sh "ssh -i ~/.ssh/${SSH_KEY_NAME}.pem -o StrictHostKeyChecking=no ubuntu@${INSTANCE_IP} '$REMOTE_COMMAND'"
+        try {
+            sh "ssh -i ~/.ssh/${SSH_KEY_NAME}.pem -o StrictHostKeyChecking=no ubuntu@${INSTANCE_IP} '$REMOTE_COMMAND'"
+        } catch(Exception err) {
+            echo "Remote SSH command failed: $err"
+            throw err
+        }
     }
 }
 

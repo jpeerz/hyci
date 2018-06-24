@@ -160,6 +160,11 @@ We can use the resgistry REST endpoint to list available containers.
     curl http://34.215.221.237:5000/v2/_catalog
     {"repositories":["hygieia-api","hygieia-ui"]}
 
+Create docker cluster
+
+    docker run -d --restart=unless-stopped --name rancher -p 8080:80 -p 8443:443 rancher/rancher
+    https://34.215.221.237:8443/    admin/admin
+
 When we need to include new container, do as next:
 
     docker tag hygieia-ui localhost:5000/hygieia-api
@@ -180,9 +185,12 @@ Run first time
 
 #### Next is done by hygieia-build jenkins pipeline
 
-    export docker-registry-host=34.215.221.237
-    docker pull docker-registry-host:5000/hygieia-ui
-    docker pull docker-registry-host:5000/hygieia-api
+    export DOCKER_REG=34.215.221.237
+
+Download containers
+
+    docker pull $DOCKER_REG:5000/hygieia-ui
+    docker pull $DOCKER_REG:5000/hygieia-api
 
 Start database
 
@@ -199,7 +207,7 @@ Init API service with minimal ENV values
     -e SPRING_DATA_MONGODB_PASSWORD=admin \
     -p 8080:8080 \
     -v hygieia_logs:/hygieia/logs \
-    -dti docker-registry-host:5000/hygieia-api:Hygieia-2.0.4
+    -dti $DOCKER_REG:5000/hygieia-api:Hygieia-2.0.4
 
 Start up the UI
 
@@ -208,7 +216,7 @@ Start up the UI
     --link api \
     -p 8088:80 \
     -e HYGIEIA_API_PORT=http://api:8080 \
-    -dti docker-registry-host:5000/hygieia-ui:Hygieia-2.0.4
+    -dti $DOCKER_REG:5000/hygieia-ui:Hygieia-2.0.4
 
 start one collector (github)
 
@@ -219,7 +227,7 @@ start one collector (github)
     -e HYGIEIA_API_ENV_SPRING_DATA_MONGODB_DATABASE=dashboarddb \
     -e HYGIEIA_API_ENV_SPRING_DATA_MONGODB_USERNAME=dashboarduser \
     -e HYGIEIA_API_ENV_SPRING_DATA_MONGODB_PASSWORD=admin \
-    -itd docker-registry-host:5000/hygieia-github-scm-collector:Hygieia-2.0.4
+    -itd $DOCKER_REG:5000/hygieia-github-scm-collector:Hygieia-2.0.4
 
 Ready to browse dashboard at 18.236.159.168:8888
 

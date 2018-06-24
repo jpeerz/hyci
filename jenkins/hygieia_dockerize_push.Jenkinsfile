@@ -61,7 +61,7 @@ node ("build"){
     
     stage('Publish New Version') {
         try {
-            docker.withRegistry("http://$DOCKER_REGISTRY"){
+            docker.withRegistry("http://${DOCKER_REGISTRY}"){
                 api = docker.image('hygieia-api')
                 api.push("${HYGIEIA_RELEASE}")
                 ui = docker.image('hygieia-ui')
