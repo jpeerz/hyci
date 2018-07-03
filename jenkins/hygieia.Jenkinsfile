@@ -39,21 +39,6 @@ node {
             throw err
         }
     }
-    stage('Stop and Clean Containers') {
-        try {
-            build([
-                job: 'hygieia-deploy', 
-                parameters: [
-                    string(name: 'HYGIEIA_BRANCH', value: params.HYGIEIA_BRANCH),
-                    string(name: 'HYGIEIA_RELEASE', value: params.HYGIEIA_RELEASE)
-                ], 
-                wait: true
-            ])
-        } catch(Exception err) {
-            echo "Deployment Failed: $err"
-            throw err
-        }
-    }
     stage('Containerize in Server') {
         try {
             build([

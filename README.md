@@ -57,7 +57,7 @@ A base linux distro with puppet ready is provisioned with a bootstrap script
 
 > previous curl is already triggered by CloudFormation during build.
 
-### Building API+UI project with AWS ec2
+### Building API+UI project with AWS ec2 (docker-web-test-2.hyci)
 
 A base ubuntu 16 image as IaC with CloudFormation + all dependencies stack provisioned with puppet.
 
@@ -160,6 +160,11 @@ We can use the resgistry REST endpoint to list available containers.
     curl http://34.215.221.237:5000/v2/_catalog
     {"repositories":["hygieia-api","hygieia-ui"]}
 
+Create docker cluster
+
+    docker run -d --restart=unless-stopped --name rancher -p 8080:80 -p 8443:443 rancher/rancher
+    https://34.215.221.237:8443/    admin/admin
+
 When we need to include new container, do as next:
 
     docker tag hygieia-ui localhost:5000/hygieia-api
@@ -167,7 +172,7 @@ When we need to include new container, do as next:
     docker tag hygieia-ui localhost:5000/hygieia-ui
     docker push localhost:5000/hygieia-ui
 
-### Build docker-web-1 machine
+### Build docker-web machine (docker-web-test-3.hyci)
 
 This web box is a docker slave ready to pull containers and run apps.
 
@@ -177,45 +182,69 @@ Run first time
     docker volume create hygieia_data
     docker run -d -p 27017:27017 --name mongodb -v hygieia_data:/data/db mongo:latest  mongod --smallfiles
     docker exec -t -i mongodb mongo admin --eval 'db.getSiblingDB("dashboarddb").createUser({user: "dashboarduser", pwd: "admin", roles: [{role: "readWrite", db: "dashboarddb"}]})'
-    
-    docker pull 34.215.221.237:5000/hygieia-ui
-    docker pull 34.215.221.237:5000/hygieia-api
+
+#### Next is done by hygieia-build jenkins pipeline
+
+    export DOCKER_REG=34.215.221.237
+
+Download containers
+
+    docker pull $DOCKER_REG:5000/hygieia-ui
+    docker pull $DOCKER_REG:5000/hygieia-api
 
 Start database
 
     docker run -d -p 27017:27017 --name mongodb -v hygieia_data:/data/db mongo:latest  mongod --smallfiles
 
-Init API service
-
-    docker tag 34.215.221.237:5000/hygieia-api hygieia-api
-    docker run -t -p 8080:8080 --name api --link mongodb:mongo -v hygieia_logs:/hygieia/logs -i hygieia-api:latest
-
-> we could use _--env-file api.env_
-
 Init API service with minimal ENV values
 
-    docker run -e SPRING_DATA_MONGODB_DATABASE=dashboarddb -e SPRING_DATA_MONGODB_HOST=127.0.0.1 -e SPRING_DATA_MONGODB_USERNAME=dashboarduser -e SPRING_DATA_MONGODB_PASSWORD=admin -dt -p 8080:8080 --name api --link mongodb:mongo --env-file /home/ubuntu/api.env -v hygieia_logs:/hygieia/logs -i hygieia-api:latest
+    docker run \
+    --name api \
+    --link mongodb:mongo \
+    -e SPRING_DATA_MONGODB_DATABASE=dashboarddb \
+    -e SPRING_DATA_MONGODB_HOST=127.0.0.1 \
+    -e SPRING_DATA_MONGODB_USERNAME=dashboarduser \
+    -e SPRING_DATA_MONGODB_PASSWORD=admin \
+    -p 8080:8080 \
+    -v hygieia_logs:/hygieia/logs \
+    -dti $DOCKER_REG:5000/hygieia-api:Hygieia-2.0.4
 
 Start up the UI
 
-    docker tag 34.215.221.237:5000/hygieia-ui hygieia-ui
-    docker run -t -p 8888:80 --name ui --link api -i hygieia-ui:latest
+    docker run \
+    --name ui \
+    --link api \
+    -p 8088:80 \
+    -e HYGIEIA_API_PORT=http://api:8080 \
+    -dti $DOCKER_REG:5000/hygieia-ui:Hygieia-2.0.4
 
-or
+start one collector (github)
 
-    docker run -e HYGIEIA_API_PORT=8080 -dt -p 8088:80 --name ui --link api -i hygieia-ui:latest
+    docker run \
+    --name github-scm \
+    --link mongodb:mongo-db \
+    -e MONGO_PORT=tcp://mongo-db:27017 \
+    -e HYGIEIA_API_ENV_SPRING_DATA_MONGODB_DATABASE=dashboarddb \
+    -e HYGIEIA_API_ENV_SPRING_DATA_MONGODB_USERNAME=dashboarduser \
+    -e HYGIEIA_API_ENV_SPRING_DATA_MONGODB_PASSWORD=admin \
+    -itd $DOCKER_REG:5000/hygieia-github-scm-collector:Hygieia-2.0.4
 
 Ready to browse dashboard at 18.236.159.168:8888
 
 ## All running
 
-jenkins-1 | http://54.202.195.169:8080/
+|local host name         |      address                          |
+|------------------------|---------------------------------------|
+|ci-six.hyci             | http://54.202.195.169:8080/           |
+|docke-one.hyci          | http://34.215.221.237:5000/v2/_catalog|
+|docker-web-test-2.hyci  | http://54.191.95.91:3000              |
+|docker-web-test-2.hyci  | http://18.236.159.168:8888            |
 
-docker-1 | http://34.215.221.237:5000/v2/_catalog
+## TODO
 
-web-1 | http://54.191.95.91:3000
-
-web-2 | http://18.236.159.168:8888
-    
-
+* Deploy & Configure controllers containers on pull machines (docker-web's CF template)
+* Update daemon.json to use private IP only
+* Automate password generation
+* Don't stop pipeline on `docker stop`
+* Script pipeline to add new ec2 machines as node using jenkins REST API.
 
